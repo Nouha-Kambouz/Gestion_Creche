@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Child - Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f6fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: #4a90e2;
+            padding: 1rem 2rem;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-header {
+            margin-bottom: 2rem;
+        }
+
+        .form-header h1 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: white;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: #4a90e2;
+            color: white;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+            border: none;
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .alert-success {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%234a5568' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.5rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="logo">
+                <i class="fas fa-child"></i>
+                Daycare Manager
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-header">
+            <h1><i class="fas fa-plus"></i> Add Child</h1>
+        </div>
+
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+        <form th:action="@{/admin/add-child}" method="post" onsubmit="return validateForm()">
+            <div class="form-group">
+                <label for="firstName">First Name *</label>
+                <input type="text" id="firstName" name="firstName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="lastName">Last Name *</label>
+                <input type="text" id="lastName" name="lastName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="birthDate">Birth Date *</label>
+                <input type="date" id="birthDate" name="birthDate" required>
+                <div id="ageError" class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="parentId">Parent *</label>
+                <select id="parentId" name="parentId" required>
+                    <option value="">Select a parent</option>
+                    <option th:each="parent : ${parents}"
+                            th:value="${parent.id}"
+                            th:text="${parent.email}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="allergies">Allergies</label>
+                <textarea id="allergies" name="allergies" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="medicalNotes">Medical Notes</label>
+                <textarea id="medicalNotes" name="medicalNotes" rows="3"></textarea>
+            </div>
+
+            <div class="buttons">
+                <a href="/admin/dashboard" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Child
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function validateForm() {
+            const birthDate = new Date(document.getElementById('birthDate').value);
+            const now = new Date();
+            
+            // Calculate age in months
+            let months = (now.getFullYear() - birthDate.getFullYear()) * 12;
+            months -= birthDate.getMonth();
+            months += now.getMonth();
+            
+            // Calculate years for maximum age check
+            const years = months / 12;
+            
+            const errorElement = document.getElementById('ageError');
+            
+            if (months < 3 || years > 6) {
+                errorElement.textContent = "Child's age must be between 3 months and 6 years";
+                errorElement.style.display = 'block';
+                return false;
+            }
+            
+            errorElement.style.display = 'none';
+            return true;
+        }
+
+        // Add event listener to birthDate input for real-time validation
+        document.getElementById('birthDate').addEventListener('change', function() {
+            validateForm();
+        });
+    </script>
+</body>
+</html> 

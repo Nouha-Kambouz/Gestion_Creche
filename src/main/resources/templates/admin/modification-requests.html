@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Modification Requests - Daycare Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f5f6fa;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: #4a90e2;
+            padding: 1rem 2rem;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .requests-list {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .request-card {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .request-info {
+            font-size: 0.9rem;
+            color: #4a5568;
+        }
+
+        .request-details {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .changes-list {
+            list-style: none;
+            margin: 0.5rem 0;
+        }
+
+        .changes-list li {
+            padding: 0.25rem 0;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .field-name {
+            font-weight: 500;
+            color: #2d3748;
+            min-width: 120px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            font-size: 0.875rem;
+        }
+
+        .btn-approve {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-reject {
+            background: #f56565;
+            color: white;
+        }
+
+        .no-requests {
+            text-align: center;
+            padding: 3rem;
+            color: #4a5568;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-success {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="logo">
+                <i class="fas fa-child"></i>
+                Daycare Manager
+            </div>
+            <div class="nav-links">
+                <a href="/admin/dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+                <form th:action="@{/logout}" method="post" style="margin: 0;">
+                    <button type="submit" class="btn btn-reject">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-tasks"></i>
+                Pending Modification Requests
+            </h1>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            <span th:text="${success}">Success message</span>
+        </div>
+
+        <div th:if="${error}" class="alert alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span th:text="${error}">Error message</span>
+        </div>
+
+        <div class="requests-list">
+            <div th:if="${#lists.isEmpty(pendingRequests)}" class="no-requests">
+                <i class="fas fa-check-circle" style="font-size: 3rem; color: #48bb78; margin-bottom: 1rem;"></i>
+                <h2>No Pending Requests</h2>
+                <p>All modification requests have been processed.</p>
+            </div>
+
+            <div th:each="request : ${pendingRequests}" class="request-card">
+                <div class="request-header">
+                    <div class="request-info">
+                        <strong>Request from:</strong> <span th:text="${request.parent.email}">parent@example.com</span><br>
+                        <strong>Child:</strong> <span th:text="${request.child.firstName + ' ' + request.child.lastName}">John Doe</span><br>
+                        <strong>Submitted:</strong> <span th:text="${#temporals.format(request.requestDate, 'dd MMM yyyy HH:mm')}">01 Jan 2024 14:30</span>
+                    </div>
+                </div>
+
+                <div class="request-details">
+                    <h3>Proposed Changes:</h3>
+                    <ul class="changes-list">
+                        <li th:with="changes=${T(com.fasterxml.jackson.databind.ObjectMapper).readValue(request.proposedChanges, T(com.example.gestion_creche.model.Child))}">
+                            <span class="field-name">First Name:</span>
+                            <span th:text="${changes.firstName}">New First Name</span>
+                        </li>
+                        <li th:with="changes=${T(com.fasterxml.jackson.databind.ObjectMapper).readValue(request.proposedChanges, T(com.example.gestion_creche.model.Child))}">
+                            <span class="field-name">Last Name:</span>
+                            <span th:text="${changes.lastName}">New Last Name</span>
+                        </li>
+                        <li th:with="changes=${T(com.fasterxml.jackson.databind.ObjectMapper).readValue(request.proposedChanges, T(com.example.gestion_creche.model.Child))}">
+                            <span class="field-name">Birth Date:</span>
+                            <span th:text="${#temporals.format(changes.birthDate, 'dd MMM yyyy')}">01 Jan 2020</span>
+                        </li>
+                        <li th:with="changes=${T(com.fasterxml.jackson.databind.ObjectMapper).readValue(request.proposedChanges, T(com.example.gestion_creche.model.Child))}">
+                            <span class="field-name">Allergies:</span>
+                            <span th:text="${changes.allergies ?: 'None'}">New Allergies</span>
+                        </li>
+                        <li th:with="changes=${T(com.fasterxml.jackson.databind.ObjectMapper).readValue(request.proposedChanges, T(com.example.gestion_creche.model.Child))}">
+                            <span class="field-name">Phone:</span>
+                            <span th:text="${changes.phoneNumber}">New Phone</span>
+                        </li>
+                        <li th:with="changes=${T(com.fasterxml.jackson.databind.ObjectMapper).readValue(request.proposedChanges, T(com.example.gestion_creche.model.Child))}">
+                            <span class="field-name">Address:</span>
+                            <span th:text="${changes.address}">New Address</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="actions">
+                    <form th:action="@{/admin/approve-request/{id}(id=${request.id})}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-approve">
+                            <i class="fas fa-check"></i>
+                            Approve
+                        </button>
+                    </form>
+                    <form th:action="@{/admin/reject-request/{id}(id=${request.id})}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-reject">
+                            <i class="fas fa-times"></i>
+                            Reject
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
